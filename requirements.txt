@@ -4,5 +4,5 @@ langchain-google-genai==2.0.4
 langchain-community==0.3.5
 google-generativeai==0.8.3
 python-dotenv==1.0.1
+protobuf==5.28.3
 pillow==10.4.0
-protobuf==5.28.
