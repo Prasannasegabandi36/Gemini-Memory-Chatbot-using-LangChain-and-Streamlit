@@ -1,6 +1,7 @@
-
 import os
+import streamlit as st
 from dotenv import load_dotenv
+
 from langchain_google_genai import ChatGoogleGenerativeAI
 from langchain.memory import ConversationSummaryBufferMemory
 from langchain.chains import ConversationChain
@@ -10,33 +11,33 @@ from langchain.prompts import PromptTemplate
 load_dotenv()
 
 
+def get_api_key():
+    try:
+        return st.secrets["GOOGLE_API_KEY"]
+    except Exception:
+        return os.getenv("GOOGLE_API_KEY")
+
+
 def demo_chatbot():
-    
-    api_key = os.getenv("GOOGLE_API_KEY")
+    api_key = get_api_key()
+
     if not api_key:
-        raise ValueError(
-            "GOOGLE_API_KEY not found. Create a .env file with: "
-            "GOOGLE_API_KEY=your_key_here"
-        )
+        raise ValueError("GOOGLE_API_KEY not found. Add it in Streamlit Secrets.")
 
     llm = ChatGoogleGenerativeAI(
-        model="gemini-2.5-flash",          
-        temperature=0.3,                    
+        model="gemini-1.5-flash",
+        temperature=0.3,
         google_api_key=api_key,
         max_output_tokens=1024,
         convert_system_message_to_human=True
     )
+
     return llm
 
 
 def demo_memory():
-    """
-    Create a summary buffer memory.
-    - Keeps recent turns verbatim
-    - Summarizes older turns once token limit is hit
-    - Prevents context window blow-up in long chats
-    """
     llm = demo_chatbot()
+
     memory = ConversationSummaryBufferMemory(
         llm=llm,
         max_token_limit=1000,
@@ -44,15 +45,14 @@ def demo_memory():
         memory_key="history",
         input_key="input"
     )
-    return memory
 
+    return memory
 
 
 CHAT_PROMPT = PromptTemplate(
     input_variables=["history", "input"],
-    template="""You are a helpful, friendly AI assistant built by BEPEC Solutions.
-You remember the ongoing conversation and answer clearly and concisely.
-If you don't know something, say so honestly instead of making things up.
+    template="""You are a helpful, friendly AI assistant.
+You remember the ongoing conversation and answer clearly.
 
 Conversation so far:
 {history}
@@ -63,16 +63,13 @@ Assistant:"""
 
 
 def demo_conversation(input_text, memory):
-    """
-    Run one turn of the conversation.
-    Returns: (assistant_reply, updated_memory)
-    """
     llm = demo_chatbot()
+
     conversation_chain = ConversationChain(
         llm=llm,
         memory=memory,
         prompt=CHAT_PROMPT,
-        verbose=False  # flip to True while debugging
+        verbose=False
     )
 
     try:
