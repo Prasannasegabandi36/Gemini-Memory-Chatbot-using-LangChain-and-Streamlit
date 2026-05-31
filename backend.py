@@ -12,30 +12,18 @@ load_dotenv()
 
 
 def get_api_key():
-    """
-    Get Google Gemini API key from:
-    1. Streamlit Cloud Secrets
-    2. Local .env file
-    """
-
     try:
         api_key = st.secrets["GOOGLE_API_KEY"]
     except Exception:
         api_key = os.getenv("GOOGLE_API_KEY")
 
     if not api_key:
-        raise ValueError(
-            "GOOGLE_API_KEY not found. Please add it in Streamlit Secrets."
-        )
+        raise ValueError("GOOGLE_API_KEY not found. Add it in Streamlit Secrets.")
 
     return api_key
 
 
 def demo_chatbot():
-    """
-    Create Gemini LLM model.
-    """
-
     api_key = get_api_key()
 
     llm = ChatGoogleGenerativeAI(
@@ -50,10 +38,6 @@ def demo_chatbot():
 
 
 def demo_memory():
-    """
-    Create conversation memory.
-    """
-
     llm = demo_chatbot()
 
     memory = ConversationSummaryBufferMemory(
@@ -82,10 +66,6 @@ Assistant:"""
 
 
 def demo_conversation(input_text, memory):
-    """
-    Run one chatbot conversation turn.
-    """
-
     llm = demo_chatbot()
 
     conversation_chain = ConversationChain(
